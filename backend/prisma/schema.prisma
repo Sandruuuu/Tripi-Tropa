@@ -1,0 +1,159 @@
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  ADMIN
+  CUSTOMER
+  VENDOR
+}
+
+enum TransportType {
+  PLANE
+  BUS
+  SHIP
+}
+
+enum ClassType {
+  ECONOMY
+  BUSINESS
+  FIRST
+  VIP
+}
+
+enum ScheduleStatus {
+  ACTIVE
+  CANCELLED
+  COMPLETED
+}
+
+enum TransactionStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}
+
+model Admin {
+  id              Int              @id @default(autoincrement())
+  username        String           @unique
+  password        String
+  name            String
+  phone           String
+  role            Role             @default(ADMIN)
+  vendorEmployees VendorEmployee[]
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+}
+
+model Customer {
+  id              Int           @id @default(autoincrement())
+  username        String        @unique
+  password        String
+  customer_number String        @unique
+  address         String
+  name            String
+  phone           String
+  role            Role          @default(CUSTOMER)
+  transactions    Transaction[]
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+}
+
+model VendorEmployee {
+  id               Int              @id @default(autoincrement())
+  username         String           @unique
+  password         String
+  name             String
+  phone            String
+  transportType    TransportType
+  role             Role             @default(VENDOR)
+  createdByAdminId Int
+  createdByAdmin   Admin            @relation(fields: [createdByAdminId], references: [id])
+  transportations  Transportation[]
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+}
+
+model Transportation {
+  id        Int             @id @default(autoincrement())
+  type      TransportType
+  name      String
+  code      String          @unique
+  capacity  Int
+  vendorId  Int?
+  vendor    VendorEmployee? @relation(fields: [vendorId], references: [id])
+  schedules Schedule[]
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+}
+
+model Schedule {
+  id            Int            @id @default(autoincrement())
+  transportId   Int
+  transport     Transportation @relation(fields: [transportId], references: [id], onDelete: Cascade)
+  origin        String
+  destination   String
+  departureTime DateTime
+  price         Decimal        @db.Decimal(12, 2)
+  status        ScheduleStatus @default(ACTIVE)
+  carriages     Carriage[]
+  transactions  Transaction[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+}
+
+model Carriage {
+  id             Int       @id @default(autoincrement())
+  scheduleId     Int
+  schedule       Schedule  @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+  carriageNumber String
+  classType      ClassType
+  totalSeats     Int
+  seats          Seat[]
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@unique([scheduleId, carriageNumber])
+}
+
+model Seat {
+  id           Int           @id @default(autoincrement())
+  carriageId   Int
+  carriage     Carriage      @relation(fields: [carriageId], references: [id], onDelete: Cascade)
+  seatNumber   String
+  isAvailable  Boolean       @default(true)
+  bookingSeats BookingSeat[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  @@unique([carriageId, seatNumber])
+}
+
+model Transaction {
+  id              Int               @id @default(autoincrement())
+  customerId      Int
+  customer        Customer          @relation(fields: [customerId], references: [id])
+  scheduleId      Int
+  schedule        Schedule          @relation(fields: [scheduleId], references: [id])
+  status          TransactionStatus @default(PENDING)
+  paymentUrl      String?
+  externalOrderId String?           @unique
+  totalAmount     Decimal           @db.Decimal(12, 2)
+  bookingSeats    BookingSeat[]
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+}
+
+model BookingSeat {
+  id            Int         @id @default(autoincrement())
+  transactionId Int
+  transaction   Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  seatId        Int
+  seat          Seat        @relation(fields: [seatId], references: [id])
+
+  @@unique([transactionId, seatId])
+}

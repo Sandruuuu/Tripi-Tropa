@@ -1,0 +1,260 @@
+{
+  "info": {
+    "name": "TripiTropa",
+    "description": "API penjualan tiket transportasi multi-moda (Pesawat, Bus, Kapal)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    { "key": "BASE-URL", "value": "http://localhost:3000" },
+    { "key": "token", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "AUTH",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "if (pm.response.code === 200 || pm.response.code === 201) {",
+              "  const body = pm.response.json();",
+              "  const token = body?.data?.token;",
+              "  if (token) {",
+              "    pm.collectionVariables.set('token', token);",
+              "    console.log('Token tersimpan ke collection variable token');",
+              "  }",
+              "}"
+            ]
+          }
+        }
+      ],
+      "item": [
+        {
+          "name": "Register Customer",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"customer_tropa\",\n  \"password\": \"password123\",\n  \"customer_number\": \"3573010123456789\",\n  \"address\": \"Malang, Jawa Timur\",\n  \"name\": \"Fransiscus Alessandro\",\n  \"phone\": \"081335810890\"\n}"
+            },
+            "url": "{{BASE-URL}}/customers",
+            "description": "Registrasi akun customer baru. Setelah sukses, lanjut Login Customer untuk dapat token."
+          }
+        },
+        {
+          "name": "Login Admin",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": "{{BASE-URL}}/auth",
+            "description": "Token otomatis disimpan ke {{token}} setelah login sukses."
+          }
+        },
+        {
+          "name": "Login Vendor Plane",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"vendor_plane\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": "{{BASE-URL}}/auth"
+          }
+        },
+        {
+          "name": "Login Customer",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"customer_tropa\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": "{{BASE-URL}}/auth",
+            "description": "Username harus sama persis dengan saat Register."
+          }
+        }
+      ]
+    },
+    {
+      "name": "CUSTOMERS",
+      "item": [
+        {
+          "name": "Get Me",
+          "request": {
+            "method": "GET",
+            "url": "{{BASE-URL}}/customers/me"
+          }
+        },
+        {
+          "name": "Katalog Jadwal",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "url": {
+              "raw": "{{BASE-URL}}/customers/schedules?type=PLANE&origin=Surabaya&page=1&quantity=10",
+              "host": ["{{BASE-URL}}"],
+              "path": ["customers", "schedules"],
+              "query": [
+                { "key": "type", "value": "PLANE" },
+                { "key": "origin", "value": "Surabaya" },
+                { "key": "page", "value": "1" },
+                { "key": "quantity", "value": "10" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Booking Tiket",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"schedule_id\": 1,\n  \"seat_ids\": [1]\n}"
+            },
+            "url": "{{BASE-URL}}/customers/transactions"
+          }
+        },
+        {
+          "name": "Riwayat Transaksi Saya",
+          "request": {
+            "method": "GET",
+            "url": "{{BASE-URL}}/customers/transactions/me?page=1&quantity=10"
+          }
+        }
+      ]
+    },
+    {
+      "name": "ADMINS",
+      "item": [
+        {
+          "name": "List Admins",
+          "request": {
+            "method": "GET",
+            "url": "{{BASE-URL}}/admins?page=1&quantity=10"
+          }
+        },
+        {
+          "name": "List Transactions",
+          "request": {
+            "method": "GET",
+            "url": "{{BASE-URL}}/admins/transactions?page=1&quantity=10&status=PENDING"
+          }
+        },
+        {
+          "name": "List Transportations",
+          "request": {
+            "method": "GET",
+            "url": "{{BASE-URL}}/admins/transportations?page=1&quantity=10"
+          }
+        },
+        {
+          "name": "List Schedules",
+          "request": {
+            "method": "GET",
+            "url": "{{BASE-URL}}/admins/schedules?origin=Surabaya&page=1&quantity=10"
+          }
+        },
+        {
+          "name": "Create Vendor Employee",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"vendor_plane_2\",\n  \"password\": \"password123\",\n  \"name\": \"Staff Pesawat 2\",\n  \"phone\": \"081234567891\",\n  \"transportType\": \"PLANE\"\n}"
+            },
+            "url": "{{BASE-URL}}/admins/vendor-employees"
+          }
+        }
+      ]
+    },
+    {
+      "name": "VENDORS",
+      "item": [
+        {
+          "name": "Get Me",
+          "request": {
+            "method": "GET",
+            "url": "{{BASE-URL}}/vendors/me"
+          }
+        },
+        {
+          "name": "List Schedules (Vendor Plane)",
+          "request": {
+            "method": "GET",
+            "url": "{{BASE-URL}}/vendors/schedules?page=1&quantity=10"
+          }
+        },
+        {
+          "name": "Create Schedule",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"transportId\": 1,\n  \"origin\": \"Jakarta\",\n  \"destination\": \"Bali\",\n  \"departureTime\": \"2026-07-01T10:00:00.000Z\",\n  \"price\": 950000\n}"
+            },
+            "url": "{{BASE-URL}}/vendors/schedules"
+          }
+        }
+      ]
+    },
+    {
+      "name": "PAYMENTS (MOCK)",
+      "item": [
+        {
+          "name": "Mock Checkout Page",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "url": "{{BASE-URL}}/payments/mock/1"
+          }
+        },
+        {
+          "name": "Simulate Pay Success",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "url": "{{BASE-URL}}/payments/mock/1/pay"
+          }
+        },
+        {
+          "name": "Webhook Callback",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"order_id\": \"TRP-1234567890-1\",\n  \"transaction_status\": \"success\"\n}"
+            },
+            "url": "{{BASE-URL}}/payments/webhook"
+          }
+        }
+      ]
+    }
+  ]
+}
