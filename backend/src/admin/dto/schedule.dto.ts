@@ -1,3 +1,4 @@
+import { Type } from 'class-transformer';
 import {
   IsDateString,
   IsEnum,
@@ -9,6 +10,7 @@ import {
   Min,
 } from 'class-validator';
 import { ScheduleStatus } from '@prisma/client';
+import { PaginationQueryDto } from '../../common/dto/pagination-query.dto';
 
 export class CreateScheduleDto {
   @IsInt()
@@ -57,7 +59,7 @@ export class UpdateScheduleDto {
   status?: ScheduleStatus;
 }
 
-export class ScheduleFilterDto {
+export class ScheduleFilterDto extends PaginationQueryDto {
   @IsOptional()
   @IsString()
   origin?: string;
@@ -71,18 +73,7 @@ export class ScheduleFilterDto {
   status?: ScheduleStatus;
 
   @IsOptional()
+  @Type(() => Number)
   @IsInt()
   transportId?: number;
-
-  @IsOptional()
-  @IsString()
-  search?: string;
-
-  @IsOptional()
-  @IsInt()
-  page?: number;
-
-  @IsOptional()
-  @IsInt()
-  quantity?: number;
 }

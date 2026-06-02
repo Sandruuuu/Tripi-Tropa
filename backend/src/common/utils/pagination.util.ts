@@ -1,6 +1,6 @@
 export function getPagination(page = 1, quantity = 10) {
-  const safePage = page < 1 ? 1 : page;
-  const safeQuantity = quantity < 1 ? 10 : quantity;
+  const safePage = Math.max(1, Number(page) || 1);
+  const safeQuantity = Math.max(1, Number(quantity) || 10);
   return {
     skip: (safePage - 1) * safeQuantity,
     take: safeQuantity,
