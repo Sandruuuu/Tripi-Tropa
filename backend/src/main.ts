@@ -10,9 +10,16 @@ import { SWAGGER_BEARER_AUTH } from './common/swagger/swagger.constants';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // Konfigurasi CORS ditambahkan di sini
+  const corsOrigins = (
+    process.env.CORS_ORIGINS ??
+    'http://localhost:3000,http://localhost:3001'
+  )
+    .split(',')
+    .map((o) => o.trim())
+    .filter(Boolean);
+
   app.enableCors({
-    origin: 'http://localhost:3001',
+    origin: corsOrigins,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
   });

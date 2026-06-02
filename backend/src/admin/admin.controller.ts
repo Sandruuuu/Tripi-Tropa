@@ -43,13 +43,12 @@ export class AdminController {
     return this.adminService.findFilter(query);
   }
 
-  /** Hanya angka — agar tidak bentrok dengan /admins/customers, /admins/schedules, dll. */
-  @Get(':id(\\d+)')
+  @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.adminService.findOne(id);
   }
 
-  @Patch(':id(\\d+)')
+  @Patch(':id')
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: UpdateAdminDto,
@@ -57,7 +56,7 @@ export class AdminController {
     return this.adminService.update(id, dto);
   }
 
-  @Delete(':id(\\d+)')
+  @Delete(':id')
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.adminService.remove(id);
   }

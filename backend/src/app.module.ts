@@ -14,8 +14,10 @@ import { JwtAuthGuard } from './auth/jwt-auth.guard';
   imports: [
     PrismaModule,
     AuthModule,
-    AdminModule,
+    // CustomerModule sebelum AdminModule: route /admins/customers didaftarkan
+    // sebelum /admins/:id di AdminController.
     CustomerModule,
+    AdminModule,
     VendorModule,
     PaymentModule,
   ],

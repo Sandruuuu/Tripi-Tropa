@@ -17,14 +17,15 @@ import { PrismaModule } from '../prisma/prisma.module';
 
 @Module({
   imports: [PrismaModule],
+  // AdminController (:id) harus terakhir agar tidak menangkap /admins/customers, dll.
   controllers: [
-    AdminController,
     AdminVendorEmployeeController,
     AdminTransportationController,
     AdminScheduleController,
     AdminCarriageController,
     AdminSeatController,
     AdminTransactionController,
+    AdminController,
   ],
   providers: [
     AdminService,
