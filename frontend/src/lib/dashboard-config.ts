@@ -90,7 +90,6 @@ export const transportationConfig: ResourceConfig = {
       type: 'enum',
       required: true,
       options: TRANSPORT_TYPES,
-      hideForVendor: true,
     },
     { name: 'name', label: 'Nama armada', type: 'text', required: true },
     { name: 'code', label: 'Kode unik', type: 'text', required: true },

@@ -105,6 +105,28 @@ export function ResourceManager({
     emptyForm(config.fields, 'create', isVendor),
   );
 
+  const [isBulk, setIsBulk] = useState(false);
+  const [bulkCount, setBulkCount] = useState('10');
+  const [selectedCarriageDetails, setSelectedCarriageDetails] = useState<any>(null);
+  const [loadingCarriage, setLoadingCarriage] = useState(false);
+
+  const handleCarriageChange = async (carriageId: string) => {
+    setField('carriageId', carriageId);
+    if (!carriageId) {
+      setSelectedCarriageDetails(null);
+      return;
+    }
+    setLoadingCarriage(true);
+    try {
+      const res = await client.getOne<any>('carriages', Number(carriageId));
+      setSelectedCarriageDetails(res.data);
+    } catch (err) {
+      console.error('Gagal mengambil detail gerbong:', err);
+    } finally {
+      setLoadingCarriage(false);
+    }
+  };
+
   const canCreate = config.canCreate !== false;
   const canDelete = config.canDelete !== false;
   const canUpdate = config.canUpdate !== false;
@@ -133,6 +155,9 @@ export function ResourceManager({
     setForm(emptyForm(config.fields, 'create', isVendor));
     setEditingId(null);
     setShowForm(false);
+    setIsBulk(false);
+    setBulkCount('10');
+    setSelectedCarriageDetails(null);
   }, [config.fields, isVendor]);
 
   const startEdit = (row: Record<string, unknown>) => {
@@ -160,6 +185,80 @@ export function ResourceManager({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    const showBulkOption = config.resource === 'seats' && !editingId;
+    if (showBulkOption && isBulk) {
+      const carriageId = form.carriageId;
+      if (!carriageId) {
+        toast.error('Silakan pilih gerbong terlebih dahulu');
+        return;
+      }
+      
+      const count = Number(bulkCount);
+      if (isNaN(count) || count <= 0) {
+        toast.error('Jumlah kursi tidak valid');
+        return;
+      }
+      
+      setLoadingCarriage(true);
+      try {
+        const res = await client.getOne<any>('carriages', Number(carriageId));
+        const carriage = res.data;
+        const existingSeats = carriage.seats ?? [];
+        const existingNumbers = new Set(existingSeats.map((s: any) => String(s.seatNumber).toUpperCase()));
+        
+        const type = carriage.schedule?.transport?.type; // 'PLANE' | 'BUS' | 'SHIP'
+        const generatedSeats: string[] = [];
+        
+        let index = 1;
+        let seatsFound = 0;
+        
+        while (seatsFound < count) {
+          let seatCode = '';
+          if (type === 'PLANE') {
+            const row = Math.ceil(index / 6);
+            const colIndex = (index - 1) % 6;
+            const letter = ['A', 'B', 'C', 'D', 'E', 'F'][colIndex];
+            seatCode = `${row}${letter}`;
+          } else if (type === 'BUS') {
+            const row = Math.ceil(index / 4);
+            const colIndex = (index - 1) % 4;
+            const letter = ['A', 'B', 'C', 'D'][colIndex];
+            seatCode = `${row}${letter}`;
+          } else if (type === 'SHIP') {
+            seatCode = `S${index}`;
+          } else {
+            seatCode = `${index}`;
+          }
+          
+          if (!existingNumbers.has(seatCode.toUpperCase())) {
+            generatedSeats.push(seatCode);
+            seatsFound++;
+          }
+          index++;
+        }
+        
+        await Promise.all(
+          generatedSeats.map((seatNumber) =>
+            client.create('seats', {
+              carriageId: Number(carriageId),
+              seatNumber,
+              isAvailable: form.isAvailable === 'true',
+            })
+          )
+        );
+        
+        toast.success(`Berhasil membuat ${count} kursi secara massal (${generatedSeats.join(', ')})`);
+        resetCreate();
+        mutate();
+      } catch (err) {
+        toast.error(getErrorMessage(err));
+      } finally {
+        setLoadingCarriage(false);
+      }
+      return;
+    }
+
     const fields = editingId ? updateFields : createFields;
     const body = buildPayload(form, fields);
 
@@ -203,7 +302,13 @@ export function ResourceManager({
           name={field.name}
           label={field.label}
           value={value}
-          onChange={(v) => setField(field.name, v)}
+          onChange={(v) => {
+            if (config.resource === 'seats' && field.name === 'carriageId') {
+              handleCarriageChange(v);
+            } else {
+              setField(field.name, v);
+            }
+          }}
           client={client}
           resource={field.relationResource}
           labelFn={
@@ -305,7 +410,76 @@ export function ResourceManager({
             onSubmit={handleSubmit}
             className="grid gap-4 sm:grid-cols-2"
           >
-            {activeFields.map(renderField)}
+            {activeFields.map((field) => {
+              if (isBulk && field.name === 'seatNumber') return null;
+              return renderField(field);
+            })}
+
+            {config.resource === 'seats' && !editingId && (
+              <div className="flex flex-col gap-2 sm:col-span-2 border-t border-slate-100 pt-4 mt-2">
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="bulk-mode"
+                    checked={isBulk}
+                    onChange={(e) => setIsBulk(e.target.checked)}
+                    className="h-4 w-4 rounded border-slate-300 text-primary-600 focus:ring-primary-500"
+                  />
+                  <label htmlFor="bulk-mode" className="text-sm font-semibold text-slate-900">
+                    Generate Kursi Massal (Bulk)
+                  </label>
+                </div>
+                
+                {isBulk && (
+                  <div className="mt-2 grid gap-4 sm:grid-cols-2 bg-slate-50 p-4 rounded-xl border border-slate-200">
+                    <div className="sm:col-span-2">
+                      <Input
+                        label="Jumlah Kursi"
+                        type="number"
+                        min="1"
+                        max="100"
+                        value={bulkCount}
+                        onChange={(e) => setBulkCount(e.target.value)}
+                        placeholder="Misal: 10"
+                        required
+                      />
+                    </div>
+                    
+                    <div className="sm:col-span-2 text-xs text-slate-600">
+                      {loadingCarriage ? (
+                        <span className="animate-pulse">Membaca detail gerbong...</span>
+                      ) : selectedCarriageDetails ? (
+                        <div className="space-y-1">
+                          <p>
+                            <strong>Tipe Armada:</strong>{' '}
+                            {selectedCarriageDetails.schedule?.transport?.type === 'PLANE'
+                              ? '✈️ Pesawat'
+                              : selectedCarriageDetails.schedule?.transport?.type === 'BUS'
+                                ? '🚌 Bus'
+                                : '🚢 Kapal'}
+                          </p>
+                          <p>
+                            <strong>Format Penomoran:</strong>{' '}
+                            {selectedCarriageDetails.schedule?.transport?.type === 'PLANE'
+                              ? '1A, 1B, 1C, 1D, 1E, 1F, 2A... (6 kursi per baris)'
+                              : selectedCarriageDetails.schedule?.transport?.type === 'BUS'
+                                ? '1A, 1B, 1C, 1D, 2A... (4 kursi per baris)'
+                                : 'S1, S2, S3... (Urut)'}
+                          </p>
+                          <p>
+                            <strong>Kursi Terisi Saat Ini:</strong>{' '}
+                            {selectedCarriageDetails.seats?.length ?? 0} kursi
+                          </p>
+                        </div>
+                      ) : (
+                        <span className="text-slate-400">Pilih gerbong terlebih dahulu untuk deteksi tipe armada.</span>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
             <div className="flex gap-2 sm:col-span-2">
               <Button type="submit">
                 {editingId ? 'Simpan' : 'Buat'}

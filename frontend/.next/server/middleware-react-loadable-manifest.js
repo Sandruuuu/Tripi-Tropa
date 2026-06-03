@@ -1,1 +1,1 @@
-self.__REACT_LOADABLE_MANIFEST="{}"
+self.__REACT_LOADABLE_MANIFEST="{\"components/seats/SeatSelectionView.tsx -> @/components/seats/SeatGrid\":{\"id\":\"components/seats/SeatSelectionView.tsx -> @/components/seats/SeatGrid\",\"files\":[\"static/chunks/_app-pages-browser_src_components_seats_SeatGrid_tsx.js\"]}}"
