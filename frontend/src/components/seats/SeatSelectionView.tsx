@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import useSWR from 'swr';
 import { schedulesApi, transactionsApi, getErrorMessage } from '@/lib/api';
-import { useToast } from '@/providers/ToastProvider';
+import { toast } from 'sonner';
 import { useAuthStore } from '@/stores/authStore';
 import { useBookingStore } from '@/stores/bookingStore';
 import { SeatLegend } from '@/components/seats/SeatLegend';
@@ -33,7 +33,7 @@ interface SeatSelectionViewProps {
 
 export function SeatSelectionView({ scheduleId }: SeatSelectionViewProps) {
   const router = useRouter();
-  const toast = useToast();
+
   const token = useAuthStore((s) => s.token);
   const setSchedule = useBookingStore((s) => s.setSchedule);
   const selectedSeats = useBookingStore((s) => s.selectedSeats);

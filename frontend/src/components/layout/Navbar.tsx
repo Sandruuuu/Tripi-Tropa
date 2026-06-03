@@ -29,13 +29,13 @@ export function Navbar() {
       : [];
 
   return (
-    <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur">
+    <header className="sticky top-0 z-50 border-b border-slate-100 bg-white/80 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
-        <Link href="/" className="flex items-center gap-2">
-          <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary-600 text-white">
+        <Link href="/" className="flex items-center gap-2 group">
+          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-50 text-primary-600 transition-colors group-hover:bg-primary-100">
             <Plane className="h-5 w-5" />
           </span>
-          <span className="text-xl font-bold text-primary-700">TripiTropa</span>
+          <span className="text-xl font-bold tracking-tight text-slate-900">Tripi<span className="text-primary-600">Tropa</span></span>
         </Link>
 
         <nav className="hidden items-center gap-1 md:flex">

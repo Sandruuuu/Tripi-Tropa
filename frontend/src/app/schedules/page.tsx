@@ -3,11 +3,13 @@
 import { Suspense, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import useSWR from 'swr';
+import { Plane } from 'lucide-react';
 import { schedulesApi, getErrorMessage } from '@/lib/api';
 import { useDebounce } from '@/lib/hooks/useDebounce';
-import { useToast } from '@/providers/ToastProvider';
-import { Input } from '@/components/ui/Input';
+import { toast } from 'sonner';
 import { Pagination } from '@/components/ui/Pagination';
+import { Button } from '@/components/ui/Button';
+import { Card } from '@/components/ui/Card';
 import {
   ScheduleFilters,
   applyClientFilters,
@@ -22,16 +24,17 @@ const defaultFilters: ScheduleFilterState = {
   types: [],
   transportId: '',
   departureRange: 'all',
+  maxPrice: 5000000,
 };
+
+type SortOption = 'Termurah' | 'Tercepat' | 'Awal' | 'Akhir';
 
 function SchedulesContent() {
   const searchParams = useSearchParams();
-  const toast = useToast();
 
   const [page, setPage] = useState(1);
-  const [searchInput, setSearchInput] = useState('');
   const [filters, setFilters] = useState<ScheduleFilterState>(defaultFilters);
-  const debouncedSearch = useDebounce(searchInput, 400);
+  const [sortOption, setSortOption] = useState<SortOption>('Termurah');
 
   const origin = searchParams.get('origin') ?? '';
   const destination = searchParams.get('destination') ?? '';
@@ -44,9 +47,8 @@ function SchedulesContent() {
       ...(origin && { origin }),
       ...(destination && { destination }),
       ...(typeParam && { type: typeParam }),
-      ...(debouncedSearch && { search: debouncedSearch }),
     }),
-    [page, origin, destination, typeParam, debouncedSearch],
+    [page, origin, destination, typeParam],
   );
 
   const { data, error, isLoading } = useSWR(
@@ -58,37 +60,47 @@ function SchedulesContent() {
   );
 
   const items = data?.data.items ?? [];
-  const filtered = useMemo(
-    () => applyClientFilters(items, filters),
-    [items, filters],
+  const filtered = useMemo
+    (() => applyClientFilters(items, filters),
+    [items, filters]
   );
+
+  const sorted = useMemo(() => {
+    const arr = [...filtered];
+    if (sortOption === 'Termurah') {
+      arr.sort((a, b) => Number(a.price) - Number(b.price));
+    } else if (sortOption === 'Awal') {
+      arr.sort((a, b) => new Date(a.departureTime).getTime() - new Date(b.departureTime).getTime());
+    } else if (sortOption === 'Akhir') {
+      arr.sort((a, b) => new Date(b.departureTime).getTime() - new Date(a.departureTime).getTime());
+    }
+    return arr;
+  }, [filtered, sortOption]);
 
   const total = data?.data.total ?? 0;
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
   return (
     <div>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-slate-900">Hasil Pencarian</h1>
-        <p className="mt-1 text-slate-600">
-          {origin || destination
-            ? `${origin || 'Semua asal'} → ${destination || 'Semua tujuan'}`
-            : 'Semua rute aktif'}
-          {typeParam ? ` · ${typeParam}` : ''}
-        </p>
-      </div>
-
-      <div className="mb-4">
-        <Input
-          placeholder="Cari kota asal atau tujuan…"
-          value={searchInput}
-          onChange={(e) => {
-            setSearchInput(e.target.value);
-            setPage(1);
-          }}
-          aria-label="Pencarian jadwal"
-        />
-      </div>
+      {/* Top Summary Box */}
+      <Card className="mb-6 border border-slate-200 shadow-sm p-4 flex items-center justify-between bg-white rounded-xl">
+        <div className="flex items-center gap-4">
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100 text-slate-500">
+            <Plane className="h-6 w-6" />
+          </div>
+          <div>
+            <h1 className="text-xl font-bold text-slate-900">
+              {origin || 'Semua Asal'} → {destination || 'Semua Tujuan'}
+            </h1>
+            <p className="text-sm text-slate-500">
+              {new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' })} | 1 Penumpang | Ekonomi
+            </p>
+          </div>
+        </div>
+        <Button variant="outline" className="border-primary-600 text-primary-600 font-semibold hover:bg-primary-50 uppercase text-xs tracking-wider h-10 px-6">
+          Ganti Pencarian
+        </Button>
+      </Card>
 
       <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
         <aside>
@@ -100,13 +112,30 @@ function SchedulesContent() {
         </aside>
 
         <section>
-          <div className="mb-4 flex items-center justify-between text-sm text-slate-500">
-            <span>
-              Menampilkan {filtered.length} dari {items.length} jadwal (halaman{' '}
-              {page})
-            </span>
+          {/* Sorting Bar */}
+          <div className="mb-6 flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+            {[
+              { id: 'Termurah', label: 'Termurah' },
+              { id: 'Tercepat', label: 'Tercepat' },
+              { id: 'Awal', label: 'Keberangkatan Paling Awal' },
+              { id: 'Akhir', label: 'Kedatangan Paling Akhir' },
+            ].map((sort) => (
+              <button
+                key={sort.id}
+                onClick={() => setSortOption(sort.id as SortOption)}
+                className={`flex-none rounded-full px-5 py-2 text-sm font-semibold transition-colors border ${
+                  sortOption === sort.id
+                    ? 'border-primary-600 bg-primary-600 text-white shadow-sm'
+                    : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50'
+                }`}
+              >
+                {sort.label}
+              </button>
+            ))}
           </div>
-          <ScheduleList schedules={filtered} isLoading={isLoading} />
+
+          <ScheduleList schedules={sorted} isLoading={isLoading} />
+          
           <Pagination
             className="mt-8"
             page={page}

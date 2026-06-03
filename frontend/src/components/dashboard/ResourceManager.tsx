@@ -4,7 +4,7 @@ import { useCallback, useMemo, useState } from 'react';
 import useSWR from 'swr';
 import { Plus, Trash2 } from 'lucide-react';
 import { getErrorMessage } from '@/lib/api';
-import { useToast } from '@/providers/ToastProvider';
+import { toast } from 'sonner';
 import { Card, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -97,7 +97,7 @@ export function ResourceManager({
   client,
   isVendor = false,
 }: ResourceManagerProps) {
-  const toast = useToast();
+
   const [page, setPage] = useState(1);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);

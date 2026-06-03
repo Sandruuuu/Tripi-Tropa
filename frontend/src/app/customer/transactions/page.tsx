@@ -5,7 +5,7 @@ import useSWR from 'swr';
 import { useRouter } from 'next/navigation';
 import { transactionsApi, getErrorMessage } from '@/lib/api';
 import { useDebounce } from '@/lib/hooks/useDebounce';
-import { useToast } from '@/providers/ToastProvider';
+import { toast } from 'sonner';
 import { useAuthStore } from '@/stores/authStore';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
@@ -25,7 +25,7 @@ const STATUS_OPTIONS = [
 
 export default function TransactionsPage() {
   const router = useRouter();
-  const toast = useToast();
+
   const token = useAuthStore((s) => s.token);
 
   const [page, setPage] = useState(1);

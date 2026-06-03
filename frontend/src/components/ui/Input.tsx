@@ -23,6 +23,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           </label>
         )}
         <input
+          suppressHydrationWarning
           ref={ref}
           id={inputId}
           className={cn(

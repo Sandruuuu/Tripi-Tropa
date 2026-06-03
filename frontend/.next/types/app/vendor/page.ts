@@ -1,4 +1,4 @@
-// File: /Users/sandro/Documents/Project/Tripi-Tropa/frontend/src/app/vendor/page.tsx
+// File: C:\npxxx\Tripi-Tropa\frontend\src\app\vendor\page.tsx
 import * as entry from '../../../../src/app/vendor/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

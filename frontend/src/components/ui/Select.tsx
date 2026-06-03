@@ -33,6 +33,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
           </label>
         )}
         <select
+          suppressHydrationWarning
           ref={ref}
           id={selectId}
           className={cn(

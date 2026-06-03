@@ -4,7 +4,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { authApi, getErrorMessage } from "@/lib/api"
-import { useToast } from "@/providers/ToastProvider"
+import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/Button"
 import {
@@ -20,7 +20,7 @@ export function SignupForm({
   ...props
 }: React.ComponentProps<"div">) {
   const router = useRouter()
-  const toast = useToast()
+
 
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")

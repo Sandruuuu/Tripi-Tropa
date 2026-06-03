@@ -1,7 +1,7 @@
 'use client';
 
 import { SWRConfig } from 'swr';
-import { ToastProvider } from './ToastProvider';
+import { Toaster } from 'sonner';
 import { getErrorMessage } from '@/lib/api';
 
 export function AppProviders({ children }: { children: React.ReactNode }) {
@@ -15,7 +15,8 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
         },
       }}
     >
-      <ToastProvider>{children}</ToastProvider>
+      {children}
+      <Toaster richColors position="bottom-right" />
     </SWRConfig>
   );
 }

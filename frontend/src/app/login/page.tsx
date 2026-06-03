@@ -4,7 +4,7 @@ import { Suspense, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { authApi, getErrorMessage } from '@/lib/api';
-import { useToast } from '@/providers/ToastProvider';
+import { toast } from 'sonner';
 import { useAuthStore } from '@/stores/authStore';
 import { getLoginRedirect, parseJwt } from '@/lib/jwt';
 import { Card, CardTitle } from '@/components/ui/Card';
@@ -15,7 +15,7 @@ function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirect = searchParams.get('redirect') ?? '/schedules';
-  const toast = useToast();
+
   const setAuth = useAuthStore((s) => s.setAuth);
 
   const [username, setUsername] = useState('');
