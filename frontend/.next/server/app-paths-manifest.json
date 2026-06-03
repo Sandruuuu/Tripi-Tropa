@@ -1,8 +1,12 @@
 {
-  "/schedules/page": "app/schedules/page.js",
-  "/customer/transactions/page": "app/customer/transactions/page.js",
-  "/login/page": "app/login/page.js",
   "/page": "app/page.js",
+  "/login/page": "app/login/page.js",
+  "/schedules/page": "app/schedules/page.js",
   "/schedules/[id]/page": "app/schedules/[id]/page.js",
-  "/vendor/seats/page": "app/vendor/seats/page.js"
+  "/customer/transactions/page": "app/customer/transactions/page.js",
+  "/admin/page": "app/admin/page.js",
+  "/admin/transactions/page": "app/admin/transactions/page.js",
+  "/admin/customers/page": "app/admin/customers/page.js",
+  "/admin/schedules/page": "app/admin/schedules/page.js",
+  "/admin/transportations/page": "app/admin/transportations/page.js"
 }
