@@ -81,9 +81,16 @@ export function Navbar() {
               Keluar
             </Button>
           ) : (
-            <Link href="/login">
-              <Button size="sm">Masuk</Button>
-            </Link>
+            <div className="flex items-center gap-2">
+              <Link href="/login">
+                <Button variant="outline" size="sm">
+                  Masuk
+                </Button>
+              </Link>
+              <Link href="/signup">
+                <Button size="sm">Daftar</Button>
+              </Link>
+            </div>
           )}
         </div>
       </div>

@@ -1787,6 +1787,16 @@ eval("// This regex will have fast negatives meaning valid identifiers may not p
 
 /***/ }),
 
+/***/ "(rsc)/../node_modules/next/font/google/target.css?{\"path\":\"src/app/layout.tsx\",\"import\":\"Geist\",\"arguments\":[{\"subsets\":[\"latin\"],\"variable\":\"--font-sans\"}],\"variableName\":\"geist\"}":
+/*!**************************************************************************************************************************************************************************************!*\
+  !*** ../node_modules/next/font/google/target.css?{"path":"src/app/layout.tsx","import":"Geist","arguments":[{"subsets":["latin"],"variable":"--font-sans"}],"variableName":"geist"} ***!
+  \**************************************************************************************************************************************************************************************/
+/***/ ((module) => {
+
+eval("// Exports\nmodule.exports = {\n\t\"style\": {\"fontFamily\":\"'Geist', 'Geist Fallback'\",\"fontStyle\":\"normal\"},\n\t\"className\": \"__className_246ccd\",\n\t\"variable\": \"__variable_246ccd\"\n};\n//# sourceURL=[module]\n//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiKHJzYykvLi4vbm9kZV9tb2R1bGVzL25leHQvZm9udC9nb29nbGUvdGFyZ2V0LmNzcz97XCJwYXRoXCI6XCJzcmMvYXBwL2xheW91dC50c3hcIixcImltcG9ydFwiOlwiR2Vpc3RcIixcImFyZ3VtZW50c1wiOlt7XCJzdWJzZXRzXCI6W1wibGF0aW5cIl0sXCJ2YXJpYWJsZVwiOlwiLS1mb250LXNhbnNcIn1dLFwidmFyaWFibGVOYW1lXCI6XCJnZWlzdFwifSIsIm1hcHBpbmdzIjoiQUFBQTtBQUNBO0FBQ0EsV0FBVyw4REFBOEQ7QUFDekU7QUFDQTtBQUNBIiwic291cmNlcyI6WyIvVXNlcnMvc2FuZHJvL0RvY3VtZW50cy9Qcm9qZWN0L1RyaXBpLVRyb3BhL25vZGVfbW9kdWxlcy9uZXh0L2ZvbnQvZ29vZ2xlL3RhcmdldC5jc3M/e1wicGF0aFwiOlwic3JjL2FwcC9sYXlvdXQudHN4XCIsXCJpbXBvcnRcIjpcIkdlaXN0XCIsXCJhcmd1bWVudHNcIjpbe1wic3Vic2V0c1wiOltcImxhdGluXCJdLFwidmFyaWFibGVcIjpcIi0tZm9udC1zYW5zXCJ9XSxcInZhcmlhYmxlTmFtZVwiOlwiZ2Vpc3RcIn0iXSwic291cmNlc0NvbnRlbnQiOlsiLy8gRXhwb3J0c1xubW9kdWxlLmV4cG9ydHMgPSB7XG5cdFwic3R5bGVcIjoge1wiZm9udEZhbWlseVwiOlwiJ0dlaXN0JywgJ0dlaXN0IEZhbGxiYWNrJ1wiLFwiZm9udFN0eWxlXCI6XCJub3JtYWxcIn0sXG5cdFwiY2xhc3NOYW1lXCI6IFwiX19jbGFzc05hbWVfMjQ2Y2NkXCIsXG5cdFwidmFyaWFibGVcIjogXCJfX3ZhcmlhYmxlXzI0NmNjZFwiXG59O1xuIl0sIm5hbWVzIjpbXSwiaWdub3JlTGlzdCI6WzBdLCJzb3VyY2VSb290IjoiIn0=\n//# sourceURL=webpack-internal:///(rsc)/../node_modules/next/font/google/target.css?{\"path\":\"src/app/layout.tsx\",\"import\":\"Geist\",\"arguments\":[{\"subsets\":[\"latin\"],\"variable\":\"--font-sans\"}],\"variableName\":\"geist\"}\n");
+
+/***/ }),
+
 /***/ "(ssr)/../node_modules/next/dist/api/navigation.js":
 /*!***************************************************!*\
   !*** ../node_modules/next/dist/api/navigation.js ***!

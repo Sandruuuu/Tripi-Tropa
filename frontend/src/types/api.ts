@@ -106,3 +106,12 @@ export interface PassengerDetail {
   phone: string;
   idNumber: string;
 }
+
+export interface RegisterPayload {
+  username: string;
+  password: string;
+  customer_number: string;
+  address: string;
+  name: string;
+  phone: string;
+}

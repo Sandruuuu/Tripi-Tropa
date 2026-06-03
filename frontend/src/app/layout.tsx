@@ -2,6 +2,10 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { AppProviders } from '@/providers/AppProviders';
 import { Navbar } from '@/components/layout/Navbar';
+import { Geist } from "next/font/google";
+import { cn } from "@/lib/utils";
+
+const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 export const metadata: Metadata = {
   title: 'TripiTropa — Pemesanan Tiket Transportasi',
@@ -15,7 +19,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="id">
+    <html lang="id" className={cn("font-sans", geist.variable)}>
       <body className="min-h-screen bg-slate-50">
         <AppProviders>
           <Navbar />

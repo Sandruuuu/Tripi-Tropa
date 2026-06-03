@@ -64,11 +64,17 @@ function LoginForm() {
           Masuk
         </Button>
       </form>
-      <p className="mt-4 text-center text-sm text-slate-500">
+      <div className="mt-4 flex flex-col items-center gap-2 text-sm text-slate-500">
+        <p>
+          Belum punya akun?{' '}
+          <Link href="/signup" className="text-primary-600 hover:underline">
+            Daftar
+          </Link>
+        </p>
         <Link href="/" className="text-primary-600 hover:underline">
           Kembali ke beranda
         </Link>
-      </p>
+      </div>
     </Card>
   );
 }

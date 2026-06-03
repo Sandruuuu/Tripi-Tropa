@@ -6,6 +6,7 @@ import type {
   CreateBookingPayload,
   LoginPayload,
   LoginResponse,
+  RegisterPayload,
   Schedule,
   ScheduleQuery,
   Transaction,
@@ -129,6 +130,12 @@ export const authApi = {
     wrapAxios(
       api
         .post<ApiDetailResponse<LoginResponse>>('/auth', payload)
+        .then((r) => r.data),
+    ),
+  register: (payload: RegisterPayload) =>
+    wrapAxios(
+      api
+        .post<ApiDetailResponse<any>>('/customers', payload)
         .then((r) => r.data),
     ),
 };
