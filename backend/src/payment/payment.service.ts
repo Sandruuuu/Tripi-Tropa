@@ -122,7 +122,7 @@ export class PaymentService {
   }
 
   async handleWebhook(payload: any) {
-    const order_id = payload.order_id;
+    const order_id = payload?.order_id;
     if (!order_id) {
       throw new BadRequestException('order_id wajib diisi');
     }
