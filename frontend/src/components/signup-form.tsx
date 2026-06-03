@@ -15,12 +15,60 @@ import {
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/Input"
 
+const reservedUsernames = [
+  'admin',
+  'administrator',
+  'root',
+  'superadmin',
+  'system',
+]
+
+function validateUsername(value: string) {
+  const trimmed = value.trim()
+  if (!trimmed) return 'Username wajib diisi.'
+  if (trimmed.length < 4) return 'Username minimal 4 karakter.'
+  if (!/^[a-zA-Z0-9._-]+$/.test(trimmed)) return 'Username hanya boleh huruf, angka, titik, garis bawah, atau strip.'
+  if (reservedUsernames.includes(trimmed.toLowerCase())) return 'Username ini tidak tersedia. Silakan pilih username lain.'
+  return ''
+}
+
+function validatePassword(value: string) {
+  if (!value) return 'Password wajib diisi.'
+  if (value.length < 6) return 'Password minimal 6 karakter.'
+  return ''
+}
+
+function validateCustomerNumber(value: string) {
+  const trimmed = value.trim()
+  if (!trimmed) return 'NIK wajib diisi.'
+  if (!/^[0-9]{16}$/.test(trimmed)) return 'NIK harus 16 digit angka tanpa spasi.'
+  return ''
+}
+
+function validateName(value: string) {
+  if (!value.trim()) return 'Nama lengkap wajib diisi.'
+  if (value.trim().length < 3) return 'Nama lengkap minimal 3 karakter.'
+  return ''
+}
+
+function validatePhone(value: string) {
+  const trimmed = value.trim()
+  if (!trimmed) return 'Nomor telepon wajib diisi.'
+  if (!/^[0-9]{9,15}$/.test(trimmed)) return 'Nomor telepon harus berupa angka 9-15 digit.'
+  return ''
+}
+
+function validateAddress(value: string) {
+  if (!value.trim()) return 'Alamat wajib diisi.'
+  if (value.trim().length < 5) return 'Alamat terlalu pendek.'
+  return ''
+}
+
 export function SignupForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
   const router = useRouter()
-
 
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
@@ -29,18 +77,60 @@ export function SignupForm({
   const [name, setName] = useState("")
   const [phone, setPhone] = useState("")
   const [loading, setLoading] = useState(false)
+  const [errors, setErrors] = useState({
+    username: '',
+    password: '',
+    customerNumber: '',
+    address: '',
+    name: '',
+    phone: '',
+  })
+
+  const validateForm = () => {
+    const usernameError = validateUsername(username)
+    const passwordError = validatePassword(password)
+    const customerNumberError = validateCustomerNumber(customerNumber)
+    const addressError = validateAddress(address)
+    const nameError = validateName(name)
+    const phoneError = validatePhone(phone)
+
+    setErrors({
+      username: usernameError,
+      password: passwordError,
+      customerNumber: customerNumberError,
+      address: addressError,
+      name: nameError,
+      phone: phoneError,
+    })
+
+    return !(
+      usernameError ||
+      passwordError ||
+      customerNumberError ||
+      addressError ||
+      nameError ||
+      phoneError
+    )
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
+
+    if (!validateForm()) {
+      toast.error('Perbaiki data pendaftaran sebelum melanjutkan.')
+      setLoading(false)
+      return
+    }
+
     try {
       await authApi.register({
-        username,
+        username: username.trim(),
         password,
-        customer_number: customerNumber,
-        address,
-        name,
-        phone,
+        customer_number: customerNumber.trim(),
+        address: address.trim(),
+        name: name.trim(),
+        phone: phone.trim(),
       })
       toast.success("Registrasi berhasil! Silakan login.")
       router.push("/login")

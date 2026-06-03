@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Card, CardTitle } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
 import type { PassengerDetail } from '@/types/api';
@@ -28,13 +28,49 @@ export function PassengerForm({ onValidChange }: PassengerFormProps) {
     });
   }, [selectedSeats.length]);
 
+  const duplicateIdNumbers = useMemo(() => {
+    const counts = forms.reduce<Record<string, number>>((acc, passenger) => {
+      const id = passenger.idNumber.trim();
+      if (!id) return acc;
+      acc[id] = (acc[id] || 0) + 1;
+      return acc;
+    }, {});
+
+    return new Set(
+      Object.entries(counts)
+        .filter(([, count]) => count > 1)
+        .map(([id]) => id),
+    );
+  }, [forms]);
+
+  const hasDuplicateIdNumbers = duplicateIdNumbers.size > 0;
+
+  const duplicateNames = useMemo(() => {
+    const counts = forms.reduce<Record<string, number>>((acc, passenger) => {
+      const name = passenger.name.trim().toLowerCase();
+      if (!name) return acc;
+      acc[name] = (acc[name] || 0) + 1;
+      return acc;
+    }, {});
+
+    return new Set(
+      Object.entries(counts)
+        .filter(([, count]) => count > 1)
+        .map(([name]) => name),
+    );
+  }, [forms]);
+
+  const hasDuplicateNames = duplicateNames.size > 0;
+
   useEffect(() => {
     setPassengers(forms);
     const valid =
       forms.length === selectedSeats.length &&
-      forms.every((p) => p.name.trim() && p.phone.trim() && p.idNumber.trim());
+      forms.every((p) => p.name.trim() && p.phone.trim() && p.idNumber.trim()) &&
+      !hasDuplicateIdNumbers &&
+      !hasDuplicateNames;
     onValidChange?.(valid);
-  }, [forms, selectedSeats.length, setPassengers, onValidChange]);
+  }, [forms, selectedSeats.length, setPassengers, onValidChange, hasDuplicateIdNumbers, hasDuplicateNames]);
 
   if (selectedSeats.length === 0) return null;
 
@@ -50,40 +86,59 @@ export function PassengerForm({ onValidChange }: PassengerFormProps) {
     <Card>
       <CardTitle className="mb-4 !text-base">Detail Penumpang</CardTitle>
       <div className="space-y-6">
-        {selectedSeats.map((seat, index) => (
-          <fieldset
-            key={seat.seatId}
-            className="rounded-lg border border-slate-200 p-4"
-          >
-            <legend className="px-1 text-sm font-medium text-slate-800">
-              Penumpang {index + 1} — Kursi {seat.seatNumber} (
-              {seat.carriageNumber})
-            </legend>
-            <div className="mt-3 grid gap-3 sm:grid-cols-2">
-              <Input
-                label="Nama lengkap"
-                value={forms[index]?.name ?? ''}
-                onChange={(e) => update(index, 'name', e.target.value)}
-                required
-              />
-              <Input
-                label="No. telepon"
-                type="tel"
-                value={forms[index]?.phone ?? ''}
-                onChange={(e) => update(index, 'phone', e.target.value)}
-                required
-              />
-              <Input
-                className="sm:col-span-2"
-                label="No. identitas (KTP/Passport)"
-                value={forms[index]?.idNumber ?? ''}
-                onChange={(e) => update(index, 'idNumber', e.target.value)}
-                required
-              />
-            </div>
-          </fieldset>
-        ))}
+        {selectedSeats.map((seat, index) => {
+          const idNumber = forms[index]?.idNumber.trim() ?? '';
+          const isDuplicate = idNumber && duplicateIdNumbers.has(idNumber);
+          const name = forms[index]?.name.trim().toLowerCase() ?? '';
+          const isDuplicateName = name && duplicateNames.has(name);
+
+          return (
+            <fieldset
+              key={seat.seatId}
+              className="rounded-lg border border-slate-200 p-4"
+            >
+              <legend className="px-1 text-sm font-medium text-slate-800">
+                Penumpang {index + 1} — Kursi {seat.seatNumber} (
+                {seat.carriageNumber})
+              </legend>
+              <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                <Input
+                  label="Nama lengkap"
+                  value={forms[index]?.name ?? ''}
+                  onChange={(e) => update(index, 'name', e.target.value)}
+                  required
+                  error={isDuplicateName ? 'Nama tidak boleh sama antar penumpang.' : undefined}
+                />
+                <Input
+                  label="No. telepon"
+                  type="tel"
+                  value={forms[index]?.phone ?? ''}
+                  onChange={(e) => update(index, 'phone', e.target.value)}
+                  required
+                />
+                <Input
+                  className="sm:col-span-2"
+                  label="No. identitas (KTP/Passport)"
+                  value={forms[index]?.idNumber ?? ''}
+                  onChange={(e) => update(index, 'idNumber', e.target.value)}
+                  required
+                  error={isDuplicate ? 'NIK tidak boleh sama antar penumpang.' : undefined}
+                />
+              </div>
+            </fieldset>
+          );
+        })}
       </div>
+      {hasDuplicateNames && (
+        <p className="mt-3 rounded-md bg-red-50 px-4 py-3 text-sm text-red-700">
+          Terdapat nama yang sama di beberapa penumpang. Mohon gunakan nama unik untuk setiap penumpang.
+        </p>
+      )}
+      {hasDuplicateIdNumbers && (
+        <p className="mt-3 rounded-md bg-red-50 px-4 py-3 text-sm text-red-700">
+          Terdapat NIK yang sama di beberapa penumpang. Mohon gunakan NIK unik untuk setiap penumpang.
+        </p>
+      )}
     </Card>
   );
 }

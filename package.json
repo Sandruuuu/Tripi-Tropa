@@ -13,6 +13,7 @@
     "build:frontend": "npm run build -w frontend"
   },
   "dependencies": {
+    "sonner": "^2.0.7",
     "toast": "^0.5.4"
   }
 }
