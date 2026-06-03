@@ -1,4 +1,4 @@
-// File: /Users/sandro/Documents/Project/Fullstack/frontend/src/app/layout.tsx
+// File: /Users/sandro/Documents/Project/Tripi-Tropa/frontend/src/app/layout.tsx
 import * as entry from '../../../src/app/layout.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

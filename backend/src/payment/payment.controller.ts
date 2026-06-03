@@ -31,10 +31,7 @@ export class PaymentController {
   @Post('webhook')
   webhook(
     @Body()
-    body: {
-      order_id?: string;
-      transaction_status: 'success' | 'failed' | 'pending';
-    },
+    body: any,
   ) {
     return this.paymentService.handleWebhook(body);
   }

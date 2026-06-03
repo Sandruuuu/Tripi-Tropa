@@ -62,8 +62,9 @@ async function upsertCarriage(
 }
 
 async function main() {
-  const password = await bcrypt.hash('password123', 10);
+  const password = await bcrypt.hash('123456', 10);
 
+  // 1. Admin
   const admin = await prisma.admin.upsert({
     where: { username: 'admin' },
     update: {},
@@ -75,6 +76,7 @@ async function main() {
     },
   });
 
+  // 2. Customer
   await prisma.customer.upsert({
     where: { username: 'customer' },
     update: {},
@@ -88,176 +90,49 @@ async function main() {
     },
   });
 
-  const vendors = await Promise.all(
-    [
-      { username: 'vendor_plane', type: TransportType.PLANE, name: 'Staff Garuda' },
-      { username: 'vendor_bus', type: TransportType.BUS, name: 'Staff PO Harapan' },
-      { username: 'vendor_ship', type: TransportType.SHIP, name: 'Staff PELNI' },
-    ].map((v) =>
-      prisma.vendorEmployee.upsert({
-        where: { username: v.username },
-        update: {},
-        create: {
-          username: v.username,
-          password,
-          name: v.name,
-          phone: '081335810890',
-          transportType: v.type,
-          createdByAdminId: admin.id,
-        },
-      }),
-    ),
-  );
+  // 3. Vendor
+  const vendor = await prisma.vendorEmployee.upsert({
+    where: { username: 'vendor_plane' },
+    update: {},
+    create: {
+      username: 'vendor_plane',
+      password,
+      name: 'Staff Garuda',
+      phone: '081335810890',
+      transportType: TransportType.PLANE,
+      createdByAdminId: admin.id,
+    },
+  });
 
-  const planeVendor = vendors.find((v) => v.transportType === TransportType.PLANE)!;
-  const busVendor = vendors.find((v) => v.transportType === TransportType.BUS)!;
-  const shipVendor = vendors.find((v) => v.transportType === TransportType.SHIP)!;
-
+  // 4. Transportation
   const plane = await prisma.transportation.upsert({
     where: { code: 'GA-330' },
-    update: { vendorId: planeVendor.id },
+    update: { vendorId: vendor.id },
     create: {
       type: TransportType.PLANE,
       name: 'Garuda Indonesia A330',
       code: 'GA-330',
       capacity: 180,
-      vendorId: planeVendor.id,
+      vendorId: vendor.id,
     },
   });
 
-  const plane2 = await prisma.transportation.upsert({
-    where: { code: 'QG-256' },
-    update: { vendorId: planeVendor.id },
-    create: {
-      type: TransportType.PLANE,
-      name: 'Citilink A320',
-      code: 'QG-256',
-      capacity: 156,
-      vendorId: planeVendor.id,
-    },
-  });
-
-  const bus = await prisma.transportation.upsert({
-    where: { code: 'PO-HJ' },
-    update: { vendorId: busVendor.id },
-    create: {
-      type: TransportType.BUS,
-      name: 'PO Harapan Jaya',
-      code: 'PO-HJ',
-      capacity: 40,
-      vendorId: busVendor.id,
-    },
-  });
-
-  const ship = await prisma.transportation.upsert({
-    where: { code: 'KM-KELUD' },
-    update: { vendorId: shipVendor.id },
-    create: {
-      type: TransportType.SHIP,
-      name: 'KM Kelud',
-      code: 'KM-KELUD',
-      capacity: 120,
-      vendorId: shipVendor.id,
-    },
-  });
-
-  const planeSchedules = await Promise.all([
-    upsertSchedule(
-      plane.id,
-      'Surabaya',
-      'Jakarta',
-      new Date('2026-06-15T08:00:00Z'),
-      850000,
-    ),
-    upsertSchedule(
-      plane.id,
-      'Jakarta',
-      'Denpasar',
-      new Date('2026-06-16T10:30:00Z'),
-      1250000,
-    ),
-    upsertSchedule(
-      plane2.id,
-      'Jakarta',
-      'Denpasar',
-      new Date('2026-06-17T06:00:00Z'),
-      980000,
-    ),
-    upsertSchedule(
-      plane2.id,
-      'Surabaya',
-      'Jakarta',
-      new Date('2026-06-18T14:00:00Z'),
-      720000,
-    ),
-  ]);
-
-  const busSchedule = await upsertSchedule(
-    bus.id,
-    'Malang',
+  // 5. Schedule
+  const schedule = await upsertSchedule(
+    plane.id,
     'Surabaya',
-    new Date('2026-06-15T06:00:00Z'),
-    75000,
-  );
-
-  await upsertSchedule(
-    bus.id,
     'Jakarta',
-    'Bandung',
-    new Date('2026-06-15T09:00:00Z'),
-    95000,
+    new Date('2026-06-15T08:00:00Z'),
+    850000,
   );
 
-  const shipSchedule = await upsertSchedule(
-    ship.id,
-    'Surabaya',
-    'Balikpapan',
-    new Date('2026-06-20T18:00:00Z'),
-    350000,
-  );
-
-  await upsertSchedule(
-    ship.id,
-    'Jakarta',
-    'Makassar',
-    new Date('2026-06-22T20:00:00Z'),
-    480000,
-  );
-
-  for (const s of planeSchedules) {
-    await upsertCarriage(s.id, 'Cabin-A', ClassType.ECONOMY, [
-      '1A',
-      '1B',
-      '2A',
-      '2B',
-      '3A',
-      '3B',
-    ]);
-    await upsertCarriage(s.id, 'Cabin-B', ClassType.BUSINESS, ['1A', '1B', '2A']);
-  }
-
-  await upsertCarriage(busSchedule.id, 'Deck-1', ClassType.ECONOMY, [
-    '1',
-    '2',
-    '3',
-    '4',
-    '5',
-    '6',
-  ]);
-
-  await upsertCarriage(shipSchedule.id, 'Deck-3', ClassType.ECONOMY, [
-    'Bunk-A',
-    'Bunk-B',
-    'Bunk-C',
-    'Bunk-D',
-  ]);
+  // 6. Carriage & Seat (Hanya 1 Carriage dengan 1 Kursi)
+  await upsertCarriage(schedule.id, 'Cabin-A', ClassType.ECONOMY, ['1A']);
 
   console.log('Seed TripiTropa selesai.');
-  console.log('Admin: admin / password123');
-  console.log('Customer: customer / password123');
-  console.log('Vendor plane: vendor_plane / password123');
-  console.log('Vendor bus: vendor_bus / password123');
-  console.log('Vendor ship: vendor_ship / password123');
+  console.log('Admin: admin / 123456');
+  console.log('Customer: customer / 123456');
+  console.log('Vendor: vendor_plane / 123456');
 }
 
 main()

@@ -70,7 +70,24 @@ export class CustomerTransactionService {
       return created;
     });
 
-    const paymentUrl = this.paymentService.buildMockPaymentUrl(transaction.id);
+    // Ambil info customer untuk payload Midtrans
+    const customer = await this.prisma.customer.findUnique({
+      where: { id: customerId },
+      select: { name: true, username: true, phone: true },
+    });
+
+    let paymentUrl = this.paymentService.buildMockPaymentUrl(transaction.id);
+    let snapToken = null;
+
+    const midtransRes = await this.paymentService.createMidtransTransaction({
+      ...transaction,
+      customer,
+    });
+
+    if (midtransRes) {
+      paymentUrl = midtransRes.redirect_url;
+      snapToken = midtransRes.token;
+    }
 
     const updated = await this.prisma.transaction.update({
       where: { id: transaction.id },
@@ -86,6 +103,7 @@ export class CustomerTransactionService {
       data: {
         transactionId: updated.id,
         payment_url: paymentUrl,
+        token: snapToken,
         transaction: updated,
       },
     };
